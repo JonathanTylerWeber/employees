@@ -6,5 +6,37 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
 
-class User(db.Model):
-    __tablename__ = 'users'
+class Department(db.Model):
+    """department model"""
+    __tablename__ = 'departments'
+
+    dept_code = db.Column(db.Text, primary_key=True)
+    dept_name = db.Column(db.Text, nullable=False, unique=True)
+    phone = db.Column(db.Text)
+
+    def __repr__(self):
+        return f'<Department {self.dept_code} {self.dept_name} {self.dept_phone} >'
+
+
+class Employee(db.Model):
+    """employee model"""
+    __tablename__ = 'employees'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False, unique=True)
+    state = db.Column(db.Text, nullable=False, default='CA')
+    dept_code = db.Column(db.Text, db.ForeignKey('departments.dept_code'))
+
+    dept = db.relationship('Department', backref='employees')
+
+    def __repr__(self):
+        return f'<Employee {self.name} {self.state} {self.dept_code} >'
+
+    def get_directory():
+        all_emps = Employee.query.all()
+
+        for emp in all_emps:
+            if emp.dept is not None:
+                print(emp.name, emp.dept.dept_code, emp.dept.phone)
+            else:
+                print(emp.name, '-', '-')
